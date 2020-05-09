@@ -12,7 +12,7 @@ setup(
         "console_scripts": ['pyc2e=pyc2e.__main__:main']
     },
     version=version,
-    description="Script injection for the Creatures Evolution Engine",
+    description="Engine management & script injection for the Creatures Evolution Engine",
     long_description=long_descr,
     long_description_content_type="text/x-rst",
     author="pushfoo",
