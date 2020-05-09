@@ -1,13 +1,13 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
-version = '0.0.1'
+version = '0.0.4'
 
 with open("README.rst", "rb") as f:
     long_descr = f.read().decode("utf-8")
 
 setup(
     name="pyc2e",
-    packages=["pyc2e"],
+    packages=find_packages(),
     entry_points={
         "console_scripts": ['pyc2e=pyc2e.__main__:main']
     },

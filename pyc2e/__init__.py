@@ -1,6 +1,13 @@
-from pyc2e import interfaces
-from pyc2e.interfaces import SUPPORTED, UNIX, WIN32
-from pyc2e.interfaces.response import Response
+"""
+Top level pyc2e package.
+
+Currently includes helpers for running the game aainst arbitrary engine names.
+
+In the future, this may include support for config, directories, and LD_PRELOAD
+
+"""
+from .interfaces import SUPPORTED, UNIX, WIN32, DEFAULT_INTERFACE_TYPE
+from .interfaces.response import Response
 
 from .common import QueryError
 
@@ -18,7 +25,7 @@ def execute_caos(
     :param timeout: how many ms to wait for the engine.
     :return:
     """
-    interface_class = SUPPORTED[interfaces.DEFAULT_INTERFACE_TYPE]
+    interface_class = SUPPORTED[DEFAULT_INTERFACE_TYPE]
 
     with interface_class(
             game_name=game_name,
@@ -43,7 +50,7 @@ def add_script(
     :param timeout: how many ms to wait for the engine
     :return:
     """
-    interface_class = SUPPORTED[interfaces.DEFAULT_INTERFACE_TYPE]
+    interface_class = SUPPORTED[DEFAULT_INTERFACE_TYPE]
 
     with interface_class(
             game_name=game_name,

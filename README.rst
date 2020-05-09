@@ -18,13 +18,10 @@ License TBD, probably a BSD or LGPL.
 How to inject CAOS from CLI
 ---------------------------
 
-If you're still sure you want to try it:
+If you're still sure you want to try it, clone the repo and::
 
-have python 3.7 or higher on Windows, then: ::
+    pip install -e .
 
-    pip install pyc2e
-
-That's it.
 
 It supports reading from stdin, ::
 
