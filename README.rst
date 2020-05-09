@@ -7,12 +7,48 @@ A pure python interface for managing the
 with no external dependencies. Based off of
 `Chris Double's documentation of the c2e shared memory interface <http://double.nz/creatures/developer/sharedmemory.htm>`_.
 
-WIP. At the moment, it only handles running & injecting `CAOS script <https://creatures.wiki/CAOS>`_.
-Much of the implementation may miss edge cases or just be gross. Posted early because people need it.
+**This isn't ready for real-world use yet. It might break your Creatures 3 / DS install.**
 
-Engine, config, and run directory management for launching and fuzzing the c2e instances will be added later.
-Assume just about everything could change. Not ready for use in production.
+See bottom for more details.
+
+License TBD, probably a BSD or LGPL.
+
+
+---------------------------
+How to inject CAOS from CLI
+---------------------------
+
+If you're still sure you want to try it:
+
+have python 3.7 or higher on Windows, then: ::
+
+    pip install pyc2e
+
+That's it.
+
+It supports reading from stdin, ::
+
+    cat filename.cos | pyc2e inject
+
+
+from files, ::
+
+    pyc2e inject --file filename.cos
+
+and arbitrary strings passed from the command line: ::
+
+    pyc2e inject --caos "outs \"testing\""
+
+On windows, you might need to omit the escapes around the quotes  .
+
+-----------------------------------------
+Not ready for use in production, very WIP
+-----------------------------------------
+
+At the moment, it only handles running & injecting `CAOS <https://creatures.wiki/CAOS>`_ on Windows.
+It's posted early because some developers need it. Much of the implementation may miss edge cases or just be ugly.
+
+Engine, config, and launch management for testing and fuzzing will be added later. Linux support will be
+added later as well. Assume just about everything could change.
 
 Assumes Python 3.7+, but it might work on lower versions.
-
-License TBD, but you can try it out and run it for now.
