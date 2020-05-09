@@ -15,6 +15,7 @@ setup(
     description="Engine management & script injection for the Creatures Evolution Engine",
     long_description=long_descr,
     long_description_content_type="text/x-rst",
+    license="To be determined",
     author="pushfoo",
     author_email="pushfoo@gmail.com",
     url="https://github.com/pushfoo/pyc2e",
