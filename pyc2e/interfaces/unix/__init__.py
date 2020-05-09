@@ -34,6 +34,8 @@ class UnixInterface:
             remote: bool=False,
             wait_timeout_ms:int =100,
             game_name: str="Docking Station"):
+        raise NotImplementedError("This is a broken sketch")
+
         self.port = port
         self.host = host
         if self.host != LOCALHOST:
