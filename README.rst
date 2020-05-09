@@ -22,6 +22,9 @@ If you're still sure you want to try it, clone the repo and::
 
     pip install -e .
 
+You can also install through pip, but it isn't guaranteed to be fresh: ::
+
+    pip install pyc2e
 
 It supports reading from stdin, ::
 
