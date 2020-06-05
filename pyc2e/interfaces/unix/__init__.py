@@ -34,7 +34,8 @@ class UnixInterface:
             remote: bool=False,
             wait_timeout_ms:int =100,
             game_name: str="Docking Station"):
-        raise NotImplementedError("This is a broken sketch")
+
+        self.connected = False
 
         self.port = port
         self.host = host
@@ -45,10 +46,17 @@ class UnixInterface:
         self.socket = None
 
     def connect(self):
+        if self.connected:
+            raise AlreadyConnected("Already connected to the engine")
+
         try:
             self.socket = socket.create_connection((self.host, self.port))
         except Exception as e:
-            raise ConnectFailure("Failed to create socket connecting to engine.") from e
+            raise ConnectFailure(
+                f"Failed to create socket connecting to engine at {self.host}:{self.port}"
+            ) from e
+
+        self.connected = True
 
     def __enter__(self):
         self.connect()
@@ -56,9 +64,13 @@ class UnixInterface:
 
 
     def disconnect(self):
-        #self.socket.shutdown(socket.SHUT_RDWR)
+
+        if not self.connected:
+            raise NotConnected("Not connected to engine")
+
         try:
             self.socket.close()
+
         except Exception as e:
             raise DisconnectFailure("Could not close socket when disconnecting from engine.") from e
 
@@ -68,17 +80,25 @@ class UnixInterface:
 
 
     def raw_request(self, caos_query):
+
+        if not self.connected:
+            self.connect()
+
         self.socket.send(caos_query)
-        data = b""
+        data = bytearray()
+
         temp_data = None
         done = False
         while not done:
             temp_data = self.socket.recv(SOCKET_CHUNK_SIZE)
             if len(temp_data):
-                data += temp_data
+                data.extend(temp_data)
             else:
                 done = True
+
+        self.disconnect()
         return data
+
 
     def caos_request(self, request):
         return self.raw_request(request + b"\nrscr")
