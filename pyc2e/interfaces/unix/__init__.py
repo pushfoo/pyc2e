@@ -91,7 +91,12 @@ class UnixInterface:
         if not self.connected:
             self.connect()
 
-        self.socket.send(caos_query)
+        if isinstance(caos_query, ByteString):
+            final_query = caos_query
+        else:
+            final_query = caos_query.encode("latin-1")
+
+        self.socket.send(final_query)
         self.socket.send(b"\nrscr")
         data = bytearray()
 
@@ -105,10 +110,7 @@ class UnixInterface:
 
         self.disconnect()
 
-        return Response(
-            data,
-            len(data)
-        )
+        return Response(data)
 
     def execute_caos(self, request: Union[str, ByteString]) -> Response:
         return self.raw_request(request)
