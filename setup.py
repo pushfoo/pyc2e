@@ -39,5 +39,6 @@ setup(
         "script injection",
         "caos"
     ],
-    python_requires='>=3.7'
+    python_requires='>=3.7',
+    tests_require=['pytest']
 )
