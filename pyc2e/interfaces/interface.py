@@ -17,6 +17,23 @@ from pyc2e.common import (
 StrOrByteString = Union[str, ByteString]
 
 
+def coerce_to_bytearray(source: StrOrByteString):
+    """
+    Coerce the source to a bytearray or return it if it already is one.
+
+    Encodes using latin-1 to start with.
+
+    :param source: a str, bytes, or bytearray to ensure is a bytearray
+    :return:
+    """
+    if isinstance(source, bytearray):
+        return source
+    elif isinstance(source, bytes):
+        return bytearray(source)
+
+    return bytearray(source.encode("latin-1"))
+
+
 class C2eCaosInterface(ABC):
     """
     Baseclass for engine CAOS interfaces.
@@ -30,11 +47,7 @@ class C2eCaosInterface(ABC):
 
     """
 
-    def __init__(
-        self,
-        wait_timeout_ms: int=100,
-        game_name: str="Docking Station"
-    ):
+    def __init__(self, wait_timeout_ms: int, game_name: str):
         self._connected = False
         self._wait_timeout_ms = wait_timeout_ms
         self._game_name = game_name
@@ -87,10 +100,15 @@ class C2eCaosInterface(ABC):
         self._connected = False
 
     @abstractmethod
-    def raw_request(self, caos_query: ByteString) -> Response:
+    def raw_request(self, query: ByteString) -> Response:
         """
+        Injects the given bytestring into the engine interface.
 
-        :param caos_query:
+        Most users won't need to use this function or care about it.
+
+        They should use execute_caos and add_script instead.
+
+        :param query: the query to inject into the engine.
         :return:
         """
         pass
@@ -127,6 +145,10 @@ class C2eCaosInterface(ABC):
 
         The script may be a bytestring or a str, but it must be the bare
         body rather than a script headed by scrp or terminated by endm.
+
+        Doesn't perform any syntax checking. The Response object can be
+        checked for signs of errors. How errors are indicated may vary
+        per platform.
 
         :param script_body:
         :param family:
