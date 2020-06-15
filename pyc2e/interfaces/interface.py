@@ -3,8 +3,7 @@ Baseclass and common functionality for c2e interfaces.
 """
 
 from abc import ABC, abstractmethod
-from collections import ByteString
-from typing import Union
+from typing import Union, ByteString
 
 from pyc2e.interfaces.response import Response
 
