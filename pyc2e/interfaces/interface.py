@@ -33,6 +33,38 @@ def coerce_to_bytearray(source: StrOrByteString):
     return bytearray(source.encode("latin-1"))
 
 
+def generate_scrp_header(
+        family: int,
+        genus: int,
+        species: int,
+        script_number: int
+) -> bytes:
+    """
+
+    Fill a template for a script injections.
+
+    They take the followimg form:
+
+        scrp {family} {genus} {species} {script_number}
+
+    See the creatures wiki entry for _SCRP for more information.
+
+    .. _SCRP: https://creatures.wiki/SCRP
+
+    :param family:
+    :param genus:
+    :param species:
+    :param script_number:
+    :return:
+    """
+    return b"scrp %i %i %i %i\n" % (
+        family,
+        genus,
+        species,
+        script_number
+    )
+
+
 class C2eCaosInterface(ABC):
     """
     Baseclass for engine CAOS interfaces.

@@ -10,7 +10,7 @@ server implementations that this can connect to.
 import socket
 from typing import ByteString, Union
 
-from pyc2e.interfaces.interface import C2eCaosInterface, StrOrByteString, coerce_to_bytearray
+from pyc2e.interfaces.interface import C2eCaosInterface, StrOrByteString, coerce_to_bytearray, generate_scrp_header
 from pyc2e.interfaces.response import Response
 from pyc2e.common import (
     NotConnected,
@@ -84,8 +84,8 @@ class UnixInterface(C2eCaosInterface):
 
         Run a raw request against the c2e engine.
 
-        Most users will not need to use this as it injects bytes  They should use execute_caos
-        or add_script instead.
+        Most users will not need to use this as it injects raw bytes. They
+        should use execute_caos or add_script instead.
 
         :param query: the caos to run.
         :return:
@@ -153,14 +153,11 @@ class UnixInterface(C2eCaosInterface):
         :return:
         """
         data = bytearray()
-        data.extend(b"scrp %i %i %i %i\n" % (
-                family,
-                genus,
-                species,
-                script_number
-            )
+
+        data.extend(
+            generate_scrp_header(family, genus, species, script_number)
         )
         data.extend(coerce_to_bytearray(script_body))
-        data.extend(b"\nendm")
+        data.extend(b"\nendm")  # lc2e seems to require endm on injected scripts
 
         return self.raw_request(data)
