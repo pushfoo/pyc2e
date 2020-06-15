@@ -48,9 +48,18 @@ class C2eCaosInterface(ABC):
     """
 
     def __init__(self, wait_timeout_ms: int, game_name: str):
-        self._connected = False
-        self._wait_timeout_ms = wait_timeout_ms
-        self._game_name = game_name
+        self._connected: bool = False
+        self._wait_timeout_ms: int = wait_timeout_ms
+        self._game_name: str = game_name
+
+    @property
+    def connected(self) -> bool:
+        """
+        Whether or not the interface is connected or not
+
+        :return:
+        """
+        return self._connected
 
     @abstractmethod
     def _connect_body(self) -> None:
@@ -96,8 +105,19 @@ class C2eCaosInterface(ABC):
         self._connected = False
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.disconnect()
+        if self.connected:
+            self.disconnect()
+
         self._connected = False
+
+    def __del__(self):
+        """
+        Destructor, cleans up any lingering connections.
+
+        :return:
+        """
+        if self.connected:
+            self.disconnect()
 
     @abstractmethod
     def raw_request(self, query: ByteString) -> Response:

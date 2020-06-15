@@ -10,6 +10,7 @@ server implementations that this can connect to.
 import socket
 from typing import ByteString, Union
 
+from pyc2e.interfaces.interface import C2eCaosInterface, StrOrByteString, coerce_to_bytearray
 from pyc2e.interfaces.response import Response
 from pyc2e.common import (
     NotConnected,
@@ -22,7 +23,7 @@ SOCKET_CHUNK_SIZE = 1024
 LOCALHOST="127.0.0.1"
 
 
-class UnixInterface:
+class UnixInterface(C2eCaosInterface):
     """
     An interface object that allows injection of CAOS over a socket.
 
@@ -40,7 +41,10 @@ class UnixInterface:
             wait_timeout_ms:int =100,
             game_name: str="Docking Station"):
 
-        self.connected = False
+        super().__init__(
+            wait_timeout_ms,
+            game_name
+        )
 
         self.port = port
         self.host = host
@@ -50,9 +54,11 @@ class UnixInterface:
             self.remote = remote
         self.socket = None
 
-    def connect(self):
-        if self.connected:
-            raise AlreadyConnected("Already connected to the engine")
+    def _connect_body(self) -> None:
+        """
+        Meat of the connection action, used by connect() in superclass.
+        :return:
+        """
 
         try:
             self.socket = socket.create_connection((self.host, self.port))
@@ -61,40 +67,33 @@ class UnixInterface:
                 f"Failed to create socket connecting to engine at {self.host}:{self.port}"
             ) from e
 
-        self.connected = True
+    def _disconnect_body(self):
+        """
+        Met of disconnect method, called by connect in superclass.
 
-    def __enter__(self):
-        self.connect()
-        return self
-
-    def disconnect(self):
-
-        if not self.connected:
-            raise NotConnected("Not connected to engine")
-
+        :return:
+        """
         try:
             self.socket.close()
 
         except Exception as e:
             raise DisconnectFailure("Could not close socket when disconnecting from engine.") from e
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.disconnect()
-
-    def raw_request(self, caos_query: Union[str, ByteString]) -> Response:
+    def raw_request(self, query: ByteString) -> Response:
         """
+
         Run a raw request against the c2e engine.
 
-        :param caos_query: the caos to run.
+        Most users will not need to use this as it injects bytes  They should use execute_caos
+        or add_script instead.
+
+        :param query: the caos to run.
         :return:
         """
         if not self.connected:
             self.connect()
 
-        if isinstance(caos_query, ByteString):
-            final_query = caos_query
-        else:
-            final_query = caos_query.encode("latin-1")
+        final_query = coerce_to_bytearray(query)
 
         self.socket.send(final_query)
         self.socket.send(b"\nrscr")
@@ -113,17 +112,45 @@ class UnixInterface:
         return Response(data)
 
     def execute_caos(self, request: Union[str, ByteString]) -> Response:
-        return self.raw_request(request)
+        caos_bytearray = coerce_to_bytearray(request)
+        return self.raw_request(caos_bytearray)
 
-
-    def add_script(self, request_body: Union[str, ByteString]) -> Response:
+    def add_script(
+            self,
+            script_body: StrOrByteString,
+            family: int,
+            genus: int,
+            species: int,
+            script_number: int
+    ) -> Response:
         """
         Attempt to add a script to the scriptorium.
 
-        :param request_body: the body to add, including the scrp header
+        The script may be a bytestring or a str, but it must be the bare
+        body rather than a script headed by scrp or terminated by endm.
+
+        Doesn't perform any syntax checking. A successful script injection
+        should return a Response object with blank data & text fields.
+
+        :param script_body:
+        :param family:
+        :param genus:
+        :param species:
+        :param script_number:
         :return:
         """
-        self.raw_request(request_body)
+        data = bytearray()
+        data.extend(b"scrp %i %i %i %i\n" % (
+                family,
+                genus,
+                species,
+                script_number
+            )
+        )
+        data.extend(coerce_to_bytearray(script_body))
+        data.extend(b"\nendm")
+
+        self.raw_request(data)
 
 
 
