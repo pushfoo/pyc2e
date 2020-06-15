@@ -150,7 +150,4 @@ class UnixInterface(C2eCaosInterface):
         data.extend(coerce_to_bytearray(script_body))
         data.extend(b"\nendm")
 
-        self.raw_request(data)
-
-
-
+        return self.raw_request(data)
