@@ -93,9 +93,7 @@ class UnixInterface(C2eCaosInterface):
         if not self.connected:
             self.connect()
 
-        final_query = coerce_to_bytearray(query)
-
-        self.socket.send(final_query)
+        self.socket.send(query)
         self.socket.send(b"\nrscr")
         response_data = bytearray()
 
