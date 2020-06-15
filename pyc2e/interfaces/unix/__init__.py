@@ -97,19 +97,19 @@ class UnixInterface(C2eCaosInterface):
 
         self.socket.send(final_query)
         self.socket.send(b"\nrscr")
-        data = bytearray()
+        response_data = bytearray()
 
         done = False
         while not done:
             temp_data = self.socket.recv(SOCKET_CHUNK_SIZE)
             if len(temp_data):
-                data.extend(temp_data)
+                response_data.extend(temp_data)
             else:
                 done = True
 
         self.disconnect()
 
-        return Response(data)
+        return Response(response_data)
 
     def execute_caos(self, request: Union[str, ByteString]) -> Response:
         caos_bytearray = coerce_to_bytearray(request)
