@@ -134,7 +134,7 @@ class C2eCaosInterface(ABC):
         pass
 
     @abstractmethod
-    def execute_caos(self, caos_query: StrOrByteString) -> Response:
+    def execute_caos(self, caos_to_execute: StrOrByteString) -> Response:
         """
         Run a piece of CAOS without storing it, returning the result.
 
@@ -146,7 +146,7 @@ class C2eCaosInterface(ABC):
         If you want to add scripts to the scriptorium, you are looking for
         add_script instead.
 
-        :param caos_query: valid CAOS to attempt running.
+        :param caos_to_execute: valid CAOS to attempt running.
         :return:
         """
         pass
@@ -170,11 +170,11 @@ class C2eCaosInterface(ABC):
         checked for signs of errors. How errors are indicated may vary
         per platform.
 
-        :param script_body:
-        :param family:
-        :param genus:
-        :param species:
-        :param script_number:
+        :param script_body: the body of the script
+        :param family: family classifier
+        :param genus: genus classifier
+        :param species: species classifier
+        :param script_number: script identifier
         :return:
         """
         pass

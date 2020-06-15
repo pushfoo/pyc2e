@@ -109,8 +109,22 @@ class UnixInterface(C2eCaosInterface):
 
         return Response(response_data)
 
-    def execute_caos(self, request: Union[str, ByteString]) -> Response:
-        caos_bytearray = coerce_to_bytearray(request)
+    def execute_caos(self, caos_to_execute: StrOrByteString) -> Response:
+        """
+        Run a piece of CAOS without storing it, returning the result.
+
+        If it is a string, it will be converted to bytes before execution.
+
+        The response object will contain a string of any output created
+        during the request.
+
+        If you want to add scripts to the scriptorium, you are looking for
+        add_script instead.
+
+        :param caos_to_execute: valid CAOS to attempt running.
+        :return:
+        """
+        caos_bytearray = coerce_to_bytearray(caos_to_execute)
         return self.raw_request(caos_bytearray)
 
     def add_script(
@@ -127,14 +141,15 @@ class UnixInterface(C2eCaosInterface):
         The script may be a bytestring or a str, but it must be the bare
         body rather than a script headed by scrp or terminated by endm.
 
-        Doesn't perform any syntax checking. A successful script injection
-        should return a Response object with blank data & text fields.
+        Doesn't perform any syntax checking. If there is any content in
+        the data or text fields of the response, there was a problem with
+        the injection.
 
-        :param script_body:
-        :param family:
-        :param genus:
-        :param species:
-        :param script_number:
+        :param script_body: the body of the script
+        :param family: family classifier
+        :param genus: genus classifier
+        :param species: species classifier
+        :param script_number: script identifier
         :return:
         """
         data = bytearray()
