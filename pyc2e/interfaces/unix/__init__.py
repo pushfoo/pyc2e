@@ -158,6 +158,6 @@ class UnixInterface(C2eCaosInterface):
             generate_scrp_header(family, genus, species, script_number)
         )
         data.extend(coerce_to_bytearray(script_body))
-        data.extend(b"\nendm")  # lc2e seems to require endm on injected scripts
+        data.extend(b"\nendm")  # lc2e requires endm on injected scripts
 
         return self.raw_request(data)
