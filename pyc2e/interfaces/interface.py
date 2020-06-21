@@ -95,7 +95,7 @@ class C2eCaosInterface(ABC):
     @abstractmethod
     def _connect_body(self) -> None:
         """
-        Perform the bulk of the connection to the engine
+        Perform the bulk of the connection to the engi
 
         Should be implemented by subclasses.
         """
@@ -135,20 +135,15 @@ class C2eCaosInterface(ABC):
 
         self._connected = False
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def _idempotent_cleanup(self) -> None:
         if self.connected:
             self.disconnect()
 
-        self._connected = False
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._idempotent_cleanup()
 
     def __del__(self):
-        """
-        Destructor, cleans up any lingering connections.
-
-        :return:
-        """
-        if self.connected:
-            self.disconnect()
+        self._idempotent_cleanup()
 
     @abstractmethod
     def raw_request(self, query: ByteString) -> Response:
