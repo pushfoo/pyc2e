@@ -222,15 +222,6 @@ class Win32Interface(C2eCaosInterface):
 
         return self.raw_request(b"execute\n" + request_body)
 
-    def test_connection(self) -> bool:
-        """Tests connection to engine.
-
-        :return: True if we can talk to an engine, false otherwise.
-        """
-        this_works = "this works"
-        response = self.execute_caos('outs "{0}"'.format(this_works)).text
-        return response.text == this_works
-
     def add_script(
         self,
         script_body: StrOrByteString,

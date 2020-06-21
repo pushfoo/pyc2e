@@ -1,7 +1,8 @@
 """
 Baseclass and common functionality for c2e interfaces.
 """
-
+from random import choice
+from string import ascii_letters
 from abc import ABC, abstractmethod
 from typing import Union, ByteString
 
@@ -15,6 +16,15 @@ from pyc2e.common import (
 
 StrOrByteString = Union[str, ByteString]
 
+
+def random_string(length: int = 5) -> str:
+    """
+    Generate a randomized string of ascii-convertible characters
+
+    :param length: how long the string should be
+    :return:
+    """
+    return ''.join(choice(ascii_letters) for i in range(0, length))
 
 def coerce_to_bytearray(source: StrOrByteString):
     """
@@ -205,8 +215,23 @@ class C2eCaosInterface(ABC):
         """
         pass
 
+    def test_connection(self) -> bool:
+        """
+        Tests connection to engine.
 
+        Verifies that the target is a valid c2e engine by requesting it
+        concatenate two halves of a random string. This behavior should
+        be supported across all c2e engines, including Sea Monkeys.
 
+        :return: True if we can talk to an engine, false otherwise.
+        """
+        expected_echo = random_string(10)
 
+        response = self.execute_caos(
+            'sets va00 "{0}" sets va01 "{1}" adds va00 va01 outs va00'.format(
+                expected_echo[0:6],
+                expected_echo[6:]
+            )
+        )
 
-
+        return response.text == expected_echo
