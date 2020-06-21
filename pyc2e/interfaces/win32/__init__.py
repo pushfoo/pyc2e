@@ -14,15 +14,18 @@ to better understand original CL tools.
 """
 import struct
 import mmap
-from typing import Union, ByteString
+from typing import ByteString
 
 from pyc2e.common import (
-    SCRIPT_START_STRING_REGEX,
     InterfaceException,
     ConnectFailure,
-    AlreadyConnected,
-    NotConnected,
     DisconnectFailure
+)
+from pyc2e.interfaces.interface import (
+    C2eCaosInterface,
+    StrOrByteString,
+    coerce_to_bytearray,
+    generate_scrp_header
 )
 
 from pyc2e.interfaces.response import Response
@@ -60,7 +63,7 @@ class ServerPIDNotFound(InterfaceException):
     pass
 
 
-class Win32Interface:
+class Win32Interface(C2eCaosInterface):
     """
     Windows shared memory interface for pyc2e engine
 
@@ -84,32 +87,31 @@ class Win32Interface:
         :param wait_timeout_ms: how many milliseconds to wait for the interface
         :param require_process_access: whether we need the process
         """
-        self.wait_timeout_ms = wait_timeout_ms
+        super().__init__(
+            wait_timeout_ms,
+            game_name
+        )
         self.require_process_access = require_process_access
 
-        self.connected = False
         self._memory_size = memory_size
-        self.game_name = game_name
 
-        self.shared_memory_name = f"{self.game_name}_mem"
+        self.shared_memory_name = f"{self._game_name}_mem"
         self.shared_memory = None
 
-        self.mutex_name = f"{self.game_name}_mutex"
+        self.mutex_name = f"{self._game_name}_mutex"
         self.mutex_object = None
 
-        self._result_event_name = f"{self.game_name}_result"
+        self._result_event_name = f"{self._game_name}_result"
         self.result_event: Event = None
 
         self.process_id = None
         self.process_handle = None
 
-        self._request_event_name = f"{game_name}_request"
+        self._request_event_name = f"{self._game_name}_request"
         self.request_event: Event = None
 
-    def connect(self) -> None:
+    def _connect_body(self) -> None:
         """Initiate a connection to the engine"""
-        if self.connected:
-            raise AlreadyConnected("Already connected to the engine")
 
         try:
             self.shared_memory = mmap.mmap(
@@ -122,20 +124,12 @@ class Win32Interface:
             self.result_event = Event(self._result_event_name)
             self.request_event = Event(self._request_event_name)
 
-            self.connected = True
+            self._connected = True
         except Exception as e:
             raise ConnectFailure("Failed to connect to the engine") from e
 
-    def __enter__(self):
-        """generator/with-statement compatibility"""
-        self.connect()
-        return self
-
-    def disconnect(self) -> None:
+    def _disconnect_body(self) -> None:
         """Clean up the connection to the engine"""
-
-        if not self.connected:
-            raise NotConnected("Not connected to engine")
 
         try:
             del self.request_event
@@ -147,20 +141,8 @@ class Win32Interface:
         except Exception as e:
             raise DisconnectFailure("Failed to cleanly disconnect from the engine") from e
 
-        self.connected = False
-
-    def _idempotent_cleanup(self) -> None:
-        if self.connected:
-            self.disconnect()
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self._idempotent_cleanup()
-
-    def __del__(self):
-        self._idempotent_cleanup()
-
     # todo: do we actually need to wait for the process handle?
-    def raw_request(self, query: Union[str, ByteString]) -> Response:
+    def raw_request(self, query: ByteString) -> Response:
         """
         A raw execution request.
 
@@ -168,13 +150,10 @@ class Win32Interface:
         :return: a response object.
         """
 
-        if not isinstance(query, ByteString):
-            query = bytes(query, "latin-1")
-
         if not self.connected:
             self.connect()
 
-        self.mutex_object.acquire(wait_in_ms=self.wait_timeout_ms)
+        self.mutex_object.acquire(wait_in_ms=self._wait_timeout_ms)
 
         # todo: better handling of struct here
         buffer_header = self.shared_memory.read(4)
@@ -205,7 +184,7 @@ class Win32Interface:
 
             wait_for_multiple_objects(
                 handles_to_wait_for,
-                wait_in_ms=self.wait_timeout_ms
+                wait_in_ms=self._wait_timeout_ms
             )
 
         finally:
@@ -233,13 +212,15 @@ class Win32Interface:
             bool(error)
         )
 
-    def execute_caos(self, request_body: str) -> Response:
+    def execute_caos(self, request_body: StrOrByteString) -> Response:
         """
         Attempt to run a piece of CAOS
         :param request_body:
         :return:
         """
-        return self.raw_request("execute\n" + request_body)
+        request_body = coerce_to_bytearray(request_body)
+
+        return self.raw_request(b"execute\n" + request_body)
 
     def test_connection(self) -> bool:
         """Tests connection to engine.
@@ -251,26 +232,33 @@ class Win32Interface:
         return response.text == this_works
 
     def add_script(
-            self,
-            request_body: str,
-
+        self,
+        script_body: StrOrByteString,
+        family: int,
+        genus: int,
+        species: int,
+        script_number: int
     ) -> Response:
         """
+        Attempt to add a script to the scriptorium.
 
-        Attempts to add a script to the scriptorium.
+        The script may be a bytestring or a str, but it must be the bare
+        body rather than a script headed by scrp or terminated by endm.
 
-        Must start with a valid script number such as 'scrp 1 1 1 1'.
+        Doesn't perform any syntax checking. The Response object can be
+        checked for signs of errors. How errors are indicated may vary
+        per platform.
 
-        Trims the endm if it exists in the script.
-
-        :param request_body: starts with a script header
+        :param script_body: the body of the script
+        :param family: family classifier
+        :param genus: genus classifier
+        :param species: species classifier
+        :param script_number: script identifier
         :return:
         """
+        request_data = coerce_to_bytearray(script_body)
+        # prepend the script header
+        request_data[:0] = generate_scrp_header(
+            family, genus, species, script_number)
 
-        if not SCRIPT_START_STRING_REGEX.match(request_body):
-            raise ValueError("Request does not appear to be a valid script")
-
-        if request_body.endswith("endm"):
-            request_body = request_body[:-4]
-
-        return self.raw_request(request_body)
+        return self.raw_request(request_data)
