@@ -10,6 +10,7 @@ server implementations that this can connect to.
 import socket
 from typing import ByteString, Union
 
+from pyc2e.interfaces.interface import C2eCaosInterface, StrOrByteString, coerce_to_bytearray, generate_scrp_header
 from pyc2e.interfaces.response import Response
 from pyc2e.common import (
     NotConnected,
@@ -22,7 +23,7 @@ SOCKET_CHUNK_SIZE = 1024
 LOCALHOST="127.0.0.1"
 
 
-class UnixInterface:
+class UnixInterface(C2eCaosInterface):
     """
     An interface object that allows injection of CAOS over a socket.
 
@@ -40,7 +41,10 @@ class UnixInterface:
             wait_timeout_ms:int =100,
             game_name: str="Docking Station"):
 
-        self.connected = False
+        super().__init__(
+            wait_timeout_ms,
+            game_name
+        )
 
         self.port = port
         self.host = host
@@ -50,9 +54,11 @@ class UnixInterface:
             self.remote = remote
         self.socket = None
 
-    def connect(self):
-        if self.connected:
-            raise AlreadyConnected("Already connected to the engine")
+    def _connect_body(self) -> None:
+        """
+        Meat of the connection action, used by connect() in superclass.
+        :return:
+        """
 
         try:
             self.socket = socket.create_connection((self.host, self.port))
@@ -61,69 +67,97 @@ class UnixInterface:
                 f"Failed to create socket connecting to engine at {self.host}:{self.port}"
             ) from e
 
-        self.connected = True
+    def _disconnect_body(self):
+        """
+        Met of disconnect method, called by connect in superclass.
 
-    def __enter__(self):
-        self.connect()
-        return self
-
-    def disconnect(self):
-
-        if not self.connected:
-            raise NotConnected("Not connected to engine")
-
+        :return:
+        """
         try:
             self.socket.close()
 
         except Exception as e:
             raise DisconnectFailure("Could not close socket when disconnecting from engine.") from e
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        self.disconnect()
-
-    def raw_request(self, caos_query: Union[str, ByteString]) -> Response:
+    def raw_request(self, query: ByteString) -> Response:
         """
+
         Run a raw request against the c2e engine.
 
-        :param caos_query: the caos to run.
+        Most users will not need to use this as it injects raw bytes. They
+        should use execute_caos or add_script instead.
+
+        :param query: the caos to run.
         :return:
         """
         if not self.connected:
             self.connect()
 
-        if isinstance(caos_query, ByteString):
-            final_query = caos_query
-        else:
-            final_query = caos_query.encode("latin-1")
-
-        self.socket.send(final_query)
+        self.socket.send(query)
         self.socket.send(b"\nrscr")
-        data = bytearray()
+        response_data = bytearray()
 
         done = False
         while not done:
             temp_data = self.socket.recv(SOCKET_CHUNK_SIZE)
             if len(temp_data):
-                data.extend(temp_data)
+                response_data.extend(temp_data)
             else:
                 done = True
 
         self.disconnect()
 
-        return Response(data)
+        return Response(response_data)
 
-    def execute_caos(self, request: Union[str, ByteString]) -> Response:
-        return self.raw_request(request)
+    def execute_caos(self, caos_to_execute: StrOrByteString) -> Response:
+        """
+        Run a piece of CAOS without storing it, returning the result.
 
+        If it is a string, it will be converted to bytes before execution.
 
-    def add_script(self, request_body: Union[str, ByteString]) -> Response:
+        The response object will contain a string of any output created
+        during the request.
+
+        If you want to add scripts to the scriptorium, you are looking for
+        add_script instead.
+
+        :param caos_to_execute: valid CAOS to attempt running.
+        :return:
+        """
+        caos_bytearray = coerce_to_bytearray(caos_to_execute)
+        return self.raw_request(caos_bytearray)
+
+    def add_script(
+            self,
+            script_body: StrOrByteString,
+            family: int,
+            genus: int,
+            species: int,
+            script_number: int
+    ) -> Response:
         """
         Attempt to add a script to the scriptorium.
 
-        :param request_body: the body to add, including the scrp header
+        The script may be a bytestring or a str, but it must be the bare
+        body rather than a script headed by scrp or terminated by endm.
+
+        Doesn't perform any syntax checking. If there is any content in
+        the data or text fields of the response, there was a problem with
+        the injection.
+
+        :param script_body: the body of the script
+        :param family: family classifier
+        :param genus: genus classifier
+        :param species: species classifier
+        :param script_number: script identifier
         :return:
         """
-        self.raw_request(request_body)
+        data = bytearray()
 
+        data.extend(
+            generate_scrp_header(family, genus, species, script_number)
+        )
+        data.extend(coerce_to_bytearray(script_body))
+        data.extend(b"\nendm")  # lc2e requires endm on injected scripts
 
-
+        return self.raw_request(data)
