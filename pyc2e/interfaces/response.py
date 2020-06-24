@@ -113,7 +113,7 @@ class Response:
         # under cpython slicing a bytes to its original length doesn't
         # seem to create a copy of it (ids are ==, a is b, etc), so this
         # should be efficient enough when we don't modify length.
-        return self._data[:cutoff_length].decode("latin-1")
+        return self._data[:cutoff_length].decode("cp1252")
 
     @property
     def error(self) -> Union[bool, None]:
