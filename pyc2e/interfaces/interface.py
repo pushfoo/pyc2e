@@ -30,7 +30,7 @@ def coerce_to_bytearray(source: StrOrByteString):
     """
     Coerce the source to a bytearray or return it if it already is one.
 
-    Encodes using latin-1 to start with.
+    Encodes using Windows-1252/CP-1252
 
     :param source: a str, bytes, or bytearray to ensure is a bytearray
     :return:
@@ -40,7 +40,7 @@ def coerce_to_bytearray(source: StrOrByteString):
     elif isinstance(source, bytes):
         return bytearray(source)
 
-    return bytearray(source.encode("latin-1"))
+    return bytearray(source.encode("cp1252"))
 
 
 def generate_scrp_header(
