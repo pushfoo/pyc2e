@@ -2,7 +2,6 @@ import sys
 import argparse
 
 import pyc2e
-from pyc2e.common import SCRIPT_START_STRING_REGEX
 
 root_parser = argparse.ArgumentParser(prog="pyc2e")
 subparsers = root_parser.add_subparsers(title="commands", dest="command")
@@ -42,12 +41,8 @@ def inject_from(
     """
 
     data = args.caos or args.file.read()
-    response = None
-    if SCRIPT_START_STRING_REGEX.match(data):
-        response = pyc2e.execute_caos(data)
-    else:
-        response = pyc2e.execute_caos(data)
-        print(response.text)
+    response = pyc2e.execute_caos(data)
+    print(response.text)
 
 
 def main() -> None:
