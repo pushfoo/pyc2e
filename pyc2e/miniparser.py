@@ -6,8 +6,8 @@ Uses regex and hacks, leaves real caos parsing to other libraries.
 """
 import re
 from re import Match
-from typing import IO, List, Dict
-from collections import namedtuple
+from typing import IO, List, Dict, DefaultDict
+from collections import namedtuple, defaultdict
 
 
 SCRP = "scrp"
@@ -27,7 +27,10 @@ REGEX_BOUNDARY_TOKENS = re.compile(TEMPLATE_SCRIPT_DEMARCATION_TOKENS)
 EventScriptSpecifier = namedtuple(
     "EventScriptSpecifier", ['family', 'genus', 'species', 'event']
 )
-EventsDict = Dict[EventScriptSpecifier, str]
+
+
+ArgEventsDict = Dict[EventScriptSpecifier, List[str]]
+EventsDict = DefaultDict[EventScriptSpecifier, List[str]]
 
 
 class ScriptsParse:
@@ -38,11 +41,15 @@ class ScriptsParse:
     def __init__(
         self,
         body_caos: List[str] = None,
-        events: EventsDict = None,
+        events: ArgEventsDict = None,
         removal_scripts: List[str] = None
     ):
         self.body_caos: List[str] = body_caos or []
-        self.events: EventsDict = events or {}
+
+        self.events: EventsDict = defaultdict(list)
+        if events:
+            self.events.update(events)
+
         self.removal_scripts: List[str] = removal_scripts or []
 
 
@@ -58,7 +65,12 @@ def read_and_strip_comments(source_stream: IO[str]) -> str:
     """
     lines = []
     for line in source_stream.readlines():
-        lines.append(line.split("*", 1)[0])
+        split = line.split("*", 1)[0]
+
+        if not split.endswith('\n'):
+            lines.append(split + "\n")
+        else:
+            lines.append(split)
 
     return "".join(lines)
 
@@ -83,6 +95,17 @@ def quote_is_unescaped(match: Match) -> bool:
         return string[quote_index - 2] != "\\"
 
     return True
+
+
+def parse_event_specifier(scrp_header: str) -> EventScriptSpecifier:
+    """
+
+    Parse an event script specifier tuple from a given scrp header
+
+    :param scrp_header: the scrp header, including the scrp command
+    :return:
+    """
+    return EventScriptSpecifier(*[int(n) for n in scrp_header[4:].split()])
 
 
 def extract_bounds_from_stripped(stripped_src: str) -> ScriptsParse:
@@ -111,16 +134,20 @@ def extract_bounds_from_stripped(stripped_src: str) -> ScriptsParse:
             if chars in SCRIPT_OPENERS:  # first 4 chars are an opener
                 if current_start_match:
                     raise ValueError(
-                        f"Opened a new script while waiting for '{current_start_match.group(0)}' to be closed")
+                        f"Opened a new script while waiting for"
+                        f" '{current_start_match.group(0)}' to be closed "
+                    )
 
                 current_start_match = raw_match
 
             else:  # it has to be an endm, close & store current context
-                snippet = stripped_src[current_start_match.end(0):raw_match.start(0)].strip()
+                snippet = stripped_src[
+                          current_start_match.end(0):raw_match.start(0)
+                ].strip()
 
                 if chars == SCRP:
-                    specifier = EventScriptSpecifier(*[int(n) for n in matched_string[4:].split()])
-                    parse.events.update({specifier : snippet})
+                    specifier = parse_event_specifier(matched_string)
+                    parse.events[specifier].append(snippet)
 
                 else:
                     parse.removal_scripts.append(snippet)
