@@ -175,6 +175,7 @@ def parse(src: str) -> ScriptsParse:
     start_match = None
     start_match_string = None
 
+    skip_start = None
     skip_until = None
 
     # tokenization is just regex
@@ -185,22 +186,23 @@ def parse(src: str) -> ScriptsParse:
         # used instead of trimmed version as newlines get culled by trim
         raw_match_string = raw_match.group(0)
 
-        if raw_match_string == "\n": # so we can report errors
+        if raw_match_string == "\n":  # so we can report errors
             line_number += 1
 
         clean_matched_string = raw_match_string.strip()
 
-        if skip_until:
+        if skip_start:
             if skip_until == '\"' and quote_is_unescaped(raw_match):
                 skip_until = None
+                skip_start = None
             elif skip_until == "\n" and raw_match_string == "\n":
                 skip_until = None
-
+                skip_start = None
             continue
 
         elif raw_match_string in SKIP_TRIGGERS:
-            skip_until = clean_matched_string
-            start_match = raw_match
+            skip_until = SKIP_TRIGGERS[raw_match_string]
+            skip_start = raw_match
             continue
 
         elif clean_matched_string in SCRIPT_OPENERS:
