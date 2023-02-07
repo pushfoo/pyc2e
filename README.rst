@@ -2,17 +2,17 @@
 pyc2e
 =====
 
-A pure python interface for injecting scripts & reading output from the
-`Creatures Evolution Engine (c2e) <https://creatures.wiki/Creatures_Evolution_Engine>`_. The only requirements are:
+A pure Python interface for injecting `CAOS code <https://creatures.wiki/CAOS>`_ & reading output from the
+`Creatures Evolution Engine (c2e) <https://creatures.wiki/Creatures_Evolution_Engine>`_. It works by wrapping parts of the Win32 API with `Python's built-in ctypes module <https://docs.python.org/3/library/ctypes.html>`_.
 
-* A compatible c2e version
+The only requirements are:
+
 * Python 3.7+
-* Running the interface in the same permission space as the target c2e instance
+* A compatible c2e version running in the same permission space as the Python interpreter
 
-Created using
-`Chris Double's documentation of the c2e shared memory interface <http://double.nz/creatures/developer/sharedmemory.htm>`_.
+Created using `Chris Double's documentation of the c2e shared memory interface <http://double.nz/creatures/developer/sharedmemory.htm>`_.
 
-**Warning: This may break your Creatures 3 / DS install.**
+**Warning: Running custom CAOS can break your Creatures 3 / DS install.**
 
 License TBD, probably a BSD or LGPL.
 
@@ -20,15 +20,15 @@ License TBD, probably a BSD or LGPL.
 How to inject CAOS from CLI
 ---------------------------
 
-If you're still sure you want to try it, clone the repo and::
+If you're still sure you want to try it, clone the repo and install via::
 
     pip install -e .
 
-You can also install through pip, but it isn't guaranteed to be fresh: ::
+You can also install through pip, but this isn't guaranteed to be fresh: ::
 
     pip install pyc2e
 
-It supports reading from stdin, ::
+pyc2e supports reading from stdin, ::
 
     cat filename.cos | pyc2e inject
 
