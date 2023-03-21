@@ -26,6 +26,7 @@ def random_string(length: int = 5) -> str:
     """
     return ''.join(choice(ascii_letters) for i in range(0, length))
 
+
 def coerce_to_bytearray(source: StrOrByteString):
     """
     Coerce the source to a bytearray or return it if it already is one.
@@ -50,10 +51,9 @@ def generate_scrp_header(
         script_number: int
 ) -> bytes:
     """
-
     Fill a template for a script injections.
 
-    They take the followimg form:
+    They take the following form:
 
         scrp {family} {genus} {species} {script_number}
 

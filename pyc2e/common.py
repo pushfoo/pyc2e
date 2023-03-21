@@ -1,5 +1,5 @@
 """
-    Common classes used by Windows and *NIX c2e interfaces.
+Common classes used by Windows and *NIX c2e interfaces.
 """
 import re
 SCRIPT_START_REGEX_STRING_TEMPLATE = r"^\s*scrp\s+\d{1,3}\s+\d{1,3}\s+\d{1,5}\s+\d{1,3}$"

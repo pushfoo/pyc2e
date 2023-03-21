@@ -1,12 +1,8 @@
 """
 Imports classes that seem appropriate for current platform.
 
-
 The dict SUPPORTED maps interface type names to their implementations. If it
 isn't in the dict, it isn't believed to be supported on the current platform.
-
-
-
 """
 import platform
 from .unix import UnixInterface

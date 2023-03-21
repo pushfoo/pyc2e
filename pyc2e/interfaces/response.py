@@ -2,7 +2,6 @@
 Holds a Response class, somewhat inspired by the requests library.
 
 It doesn't yet imitate that library very well.
-
 """
 
 from typing import ByteString, Union
@@ -20,7 +19,6 @@ class Response:
     Currently, it transparently returns the data object. In the future,
     data may be presented as a stream and act more like the requests
     library's response object.
-
     """
 
     def __init__(
@@ -119,6 +117,7 @@ class Response:
     def error(self) -> Union[bool, None]:
         """
         Return error status, if any was declared by the engine.
+
         :return:
         """
         return self._error
