@@ -1,10 +1,8 @@
 """
 Holds a Response class, somewhat inspired by the requests library.
-
-It doesn't yet imitate that library very well.
 """
 
-from typing import ByteString, Union
+from typing import ByteString, Optional
 
 
 class Response:
@@ -12,61 +10,42 @@ class Response:
     A cross-platform abstraction of a c2e engine's interface response.
 
     Not meant to be instantiated by users, only by interface classes.
-
-    All attributes are hidden behind properties. The class is not meant to
-    be altered once created.
+    The class is also intended to be immutable.
 
     Currently, it transparently returns the data object. In the future,
     data may be presented as a stream and act more like the requests
     library's response object.
+
+    Optional arguments will be set to None on platforms with
+    socket-based engine interfaces which do not support them.
+
+    :param data: raw response data as provided by the engine.
+    :param declared_length: (Windows only) How long the engine said the response is
+    :param error: (Windows only) the error status the engine provided,
+        per Chris Double's engine documentation. Other platforms must parse
+        the response body to check for errors.
+    :param null_terminated: whether data has a null terminator. Socket interface
+        engine versions seem to omit null terminators.
     """
 
     def __init__(
             self,
-            data: ByteString = None,
-            declared_length: int = None,
-            error: bool = None,
+            data: Optional[ByteString] = None,
+            declared_length: Optional[int] = None,
+            error: Optional[bool] = None,
             null_terminated: bool = False,
     ):
-        """
 
-        Build a cross-platform response object.
+        self._data: bytes = b"" if data is None else bytes(data)
 
-        Data is a bytestring data source. It will be converted to bytes.
-
-        Windows-only properties include:
-
-        declared_length, how long the engine said the response will be.
-        None on socket interface platforms.
-
-        error, a windows-only property that corresponds to chris
-        double's error flag documentation. Programs using the socket
-        interface will have to parse the body of the response to decide if
-        there was an error condition.
-
-        null_terminator, whether to expect a null terminator at the end if
-        the response should be a string. The socket interface appears to
-        omit null terminators.
-
-        :param data: raw response data as provided by the engine.
-        :param declared_length: How long the engine said the response is
-        :param error: the error status the engine provided, if any.
-        :param null_terminated: whether data has a null terminator
-        """
-
-        if null_terminated and data[-1] != 0:
+        if null_terminated and self._data and self._data[-1] != 0:
             raise ValueError(
                 "Buffer does not appear to hold a null-terminated string"
             )
 
-        if data is None:
-            self._data = b""
-        else:
-            self._data: bytes = bytes(data)
-
-        self._declared_length: int = declared_length
-        self._error: bool = error
-        self._null_terminated: bool = null_terminated
+        self._declared_length = declared_length
+        self._error = error
+        self._null_terminated = null_terminated
 
     @property
     def data(self) -> bytes:
@@ -78,7 +57,7 @@ class Response:
         return self._data
 
     @property
-    def declared_length(self) -> int:
+    def declared_length(self) -> Optional[int]:
         return self._declared_length
 
     @property
@@ -114,7 +93,7 @@ class Response:
         return self._data[:cutoff_length].decode("cp1252")
 
     @property
-    def error(self) -> Union[bool, None]:
+    def error(self) -> Optional[bool]:
         """
         Return error status, if any was declared by the engine.
 
@@ -123,9 +102,9 @@ class Response:
         return self._error
 
     @property
-    def null_terminated(self) -> bool:
+    def null_terminated(self) -> Optional[bool]:
         """
-        If the return data is a string, whether it will be null terminated
+        The known null termination state, if any.
 
         :return: whether to expect null termination on strings
         """
