@@ -8,24 +8,26 @@ server implementations that this can connect to.
 """
 
 import socket
-from typing import ByteString, Union
+from typing import ByteString
 
-from pyc2e.interfaces.interface import C2eCaosInterface, StrOrByteString, coerce_to_bytearray, generate_scrp_header
+from pyc2e.interfaces.interface import (
+    C2eCaosInterface,
+    StrOrByteString,
+    coerce_to_bytearray,
+    generate_scrp_header
+)
 from pyc2e.interfaces.response import Response
-from pyc2e.common import (
-    NotConnected,
-    DisconnectFailure,
-    AlreadyConnected, ConnectFailure)
+from pyc2e.common import DisconnectFailure, ConnectFailure
 
 socket.setdefaulttimeout(0.200)
 
 SOCKET_CHUNK_SIZE = 1024
-LOCALHOST="127.0.0.1"
+LOCALHOST = "127.0.0.1"
 
 
 class UnixInterface(C2eCaosInterface):
     """
-    An interface object that allows injection of CAOS over a socket.
+    Wrapper around the socket CAOS interface of Linux/Mac game versions.
 
     Access attempts on VirtualBox instances have gotten blank responses
     in the past despite the engine not being running.
@@ -35,11 +37,11 @@ class UnixInterface(C2eCaosInterface):
     """
     def __init__(
             self,
-            port: int=20001,
-            host: str="127.0.0.1",
-            remote: bool=False,
-            wait_timeout_ms:int =100,
-            game_name: str="Docking Station"):
+            port: int = 20001,
+            host: str = "127.0.0.1",
+            remote: bool = False,
+            wait_timeout_ms: int = 100,
+            game_name: str = "Docking Station"):
 
         super().__init__(
             wait_timeout_ms,
@@ -64,7 +66,8 @@ class UnixInterface(C2eCaosInterface):
             self.socket = socket.create_connection((self.host, self.port))
         except Exception as e:
             raise ConnectFailure(
-                f"Failed to create socket connecting to engine at {self.host}:{self.port}"
+                f"Failed to create socket connecting to engine"
+                f"at {self.host}:{self.port}"
             ) from e
 
     def _disconnect_body(self):
@@ -77,7 +80,9 @@ class UnixInterface(C2eCaosInterface):
             self.socket.close()
 
         except Exception as e:
-            raise DisconnectFailure("Could not close socket when disconnecting from engine.") from e
+            raise DisconnectFailure(
+                "Could not close socket when disconnecting from engine."
+            ) from e
 
     def raw_request(self, query: ByteString) -> Response:
         """
