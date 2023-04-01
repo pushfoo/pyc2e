@@ -1,28 +1,32 @@
 """
 Top level pyc2e package.
 
-Currently includes helpers for running the game aainst arbitrary engine names.
+This currently limited to helpers for running the game
+against arbitrary engine names.
 
-In the future, this may include support for config, directories, and LD_PRELOAD
-
+In the future, this may include support for config, directories,
+and LD_PRELOAD.
 """
-from .interfaces import SUPPORTED, UNIX, WIN32, DEFAULT_INTERFACE_TYPE
+from .interfaces import (
+    DEFAULT_INTERFACE_TYPE,
+    SUPPORTED,
+    UnixInterface,
+    Win32Interface
+)
 from .interfaces.response import Response
-
-from .common import QueryError
 
 
 def execute_caos(
     query_body: str,
-    game_name: str ="Docking Station",
+    game_name: str = "Docking Station",
     timeout: int = 100
 ) -> Response:
     """
     Easy mode for executing CAOS against a running game.
 
-    :param query_body: the CAOS to execute.
-    :param game_name: the current name of the engine.
-    :param timeout: how many ms to wait for the engine.
+    :param query_body: The CAOS to execute.
+    :param game_name: The current name of the engine.
+    :param timeout: How many ms to wait for the engine's response
     :return:
     """
     interface_class = SUPPORTED[DEFAULT_INTERFACE_TYPE]
@@ -35,9 +39,10 @@ def execute_caos(
         response = interface.execute_caos(query_body)
         return response
 
+
 def add_script(
     script: str,
-    game_name: str ="Docking Station",
+    game_name: str = "Docking Station",
     timeout: int = 100
 ) -> Response:
     """
@@ -45,9 +50,9 @@ def add_script(
 
     Assumes the script is headed with a valid script header.
 
-    :param script: the script that weill be added to the scriptorium.
-    :param game_name:
-    :param timeout: how many ms to wait for the engine
+    :param script: The script to add to the scriptorium.
+    :param game_name: The engine instance's self-reported name
+    :param timeout: How many ms to wait for the engine's response
     :return:
     """
     interface_class = SUPPORTED[DEFAULT_INTERFACE_TYPE]
@@ -60,3 +65,11 @@ def add_script(
         return response
 
 
+__all__ = [
+    "DEFAULT_INTERFACE_TYPE",
+    "add_script",
+    "execute_caos",
+    "SUPPORTED",
+    "UnixInterface",
+    "Win32Interface",
+]
