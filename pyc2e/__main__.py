@@ -1,4 +1,3 @@
-import sys
 import argparse
 
 import pyc2e
@@ -27,11 +26,6 @@ injection_source_group.add_argument(
     type=str,
 )
 
-# check if stderr exists for printing
-# yes, it does
-
-#exit return value
-
 
 def inject_from(
     args
@@ -54,8 +48,3 @@ def main() -> None:
     args = root_parser.parse_args()
     if args.command == "inject":
         inject_from(args)
-
-
-
-
-
