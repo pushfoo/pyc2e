@@ -63,7 +63,6 @@ class Mutex(ObjectWithHandle):
             wintypes.LPCSTR(bytes(self.name, 'ASCII'))
         )
 
-
     def acquire(self, wait_in_ms: int = INFINITE_WAIT):
         """
         Attempt to acquire the mutex, waiting the given amount of time
@@ -105,5 +104,3 @@ class Mutex(ObjectWithHandle):
         """
         self.release()
         self.close()
-
-

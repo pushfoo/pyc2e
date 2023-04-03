@@ -76,9 +76,9 @@ class Win32Interface(C2eCaosInterface):
     def __init__(
             self,
             game_name: str = "Docking Station",
-            memory_size: int= DEFAULT_SHARED_MEMORY_SIZE,
+            memory_size: int = DEFAULT_SHARED_MEMORY_SIZE,
             wait_timeout_ms: int = INFINITE_WAIT,
-            require_process_access: bool= True
+            require_process_access: bool = True
     ):
         """
 
@@ -139,7 +139,8 @@ class Win32Interface(C2eCaosInterface):
             del self.shared_memory
 
         except Exception as e:
-            raise DisconnectFailure("Failed to cleanly disconnect from the engine") from e
+            raise DisconnectFailure(
+                "Failed to cleanly disconnect from the engine") from e
 
     # todo: do we actually need to wait for the process handle?
     def raw_request(self, query: ByteString) -> Response:

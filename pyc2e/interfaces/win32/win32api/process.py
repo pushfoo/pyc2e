@@ -27,7 +27,8 @@ class ProcessHandle(ObjectWithHandle):
 
         Raises a WinError if it fails.
 
-        see msdn doc for OpenProcess for more information about process handles.
+        See the msdn doc for OpenProcess for more information about
+        process handles.
 
         :param process_id: the id of the process to open
         :param inherit_handle: whether children should inherit permissions
@@ -48,11 +49,3 @@ class ProcessHandle(ObjectWithHandle):
         @property
         def pid(self) -> int:
             return self._id
-
-
-
-
-
-
-
-

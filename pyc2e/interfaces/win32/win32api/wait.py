@@ -33,7 +33,7 @@ _wait_for_multiple_objects.restype = DWORD
 def wait_for_multiple_objects(
         handle_array: List[HANDLE],
         wait_all: bool = False,
-        wait_in_ms: int =0
+        wait_in_ms: int = 0
 ) -> int:
     """
     Wait for multiple win32api objects.
@@ -63,4 +63,3 @@ def wait_for_multiple_objects(
         wait_all,
         wait_in_ms
     )
-

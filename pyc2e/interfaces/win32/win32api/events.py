@@ -10,7 +10,8 @@ from ctypes.wintypes import (
     HANDLE
 )
 
-from pyc2e.interfaces.win32.win32api.common import error_if_null_return, ObjectWithHandle
+from pyc2e.interfaces.win32.win32api.common import (
+    error_if_null_return, ObjectWithHandle)
 
 EVENT_ALL_ACCESS = 0x1F0003
 
@@ -29,7 +30,7 @@ def open_event(
         desired_access: int = EVENT_ALL_ACCESS,
         inherit_handle: bool = False) -> HANDLE:
     """
-    Attempts to open an event object with the given name at the requested access level.
+    Attempt to open the named event object at the requested access level.
 
     The name must easily convert to ascii.
 
@@ -85,5 +86,3 @@ class Event(ObjectWithHandle):
         """Set the event to the signalling state"""
         if not pulse_event(self.handle):
             raise WinError()
-
-
