@@ -20,12 +20,13 @@ class Response:
     socket-based engine interfaces which do not support them.
 
     :param data: raw response data as provided by the engine.
-    :param declared_length: (Windows only) How long the engine said the response is
+    :param declared_length: (Windows only) How long the engine said the
+        response is
     :param error: (Windows only) the error status the engine provided,
-        per Chris Double's engine documentation. Other platforms must parse
-        the response body to check for errors.
-    :param null_terminated: whether data has a null terminator. Socket interface
-        engine versions seem to omit null terminators.
+        per Chris Double's engine documentation. Other platforms must
+        parse the response body to check for errors.
+    :param null_terminated: whether data has a null terminator. Socket
+        interface engine versions seem to omit null terminators.
     """
 
     def __init__(
