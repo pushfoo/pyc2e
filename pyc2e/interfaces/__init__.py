@@ -24,4 +24,3 @@ if platform.system() == 'Windows':
 
     SUPPORTED[WIN32] = Win32Interface
     DEFAULT_INTERFACE_TYPE = WIN32
-
