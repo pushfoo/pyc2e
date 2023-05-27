@@ -7,13 +7,16 @@ against arbitrary engine names.
 In the future, this may include support for config, directories,
 and LD_PRELOAD.
 """
-from .interfaces import (
+from pyc2e.interfaces import (
     DEFAULT_INTERFACE_TYPE,
     SUPPORTED,
+    WIN32,
     UnixInterface,
-    Win32Interface
 )
-from .interfaces.response import Response
+if WIN32 in SUPPORTED:
+    from pyc2e.interfaces import Win32Interface
+
+from pyc2e.interfaces.response import Response
 
 
 def execute_caos(

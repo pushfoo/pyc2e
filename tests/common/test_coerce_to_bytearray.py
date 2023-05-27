@@ -2,7 +2,7 @@
 Ensure that coerce_to_bytearray works correctly
 """
 
-from pyc2e.interfaces.interface import coerce_to_bytearray
+from pyc2e.interfaces import coerce_to_bytearray
 
 
 def test_coercing_to_bytearray_returns_bytearray_unchanged():

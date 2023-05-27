@@ -5,7 +5,8 @@ The dict SUPPORTED maps interface type names to their implementations. If it
 isn't in the dict, it isn't believed to be supported on the current platform.
 """
 import platform
-from .unix import UnixInterface
+from pyc2e.interfaces.interface import coerce_to_bytearray
+from pyc2e.interfaces.unix import UnixInterface
 
 WIN32 = 'win32'
 UNIX = 'unix'
@@ -19,7 +20,7 @@ DEFAULT_INTERFACE_TYPE = UNIX
 
 # enable windows support on windows
 if platform.system() == 'Windows':
-    from .win32 import Win32Interface
+    from pyc2e.interfaces.win32 import Win32Interface
     LOCAL_PLATFORM = WIN32
 
     SUPPORTED[WIN32] = Win32Interface
