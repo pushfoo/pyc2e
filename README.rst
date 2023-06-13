@@ -14,8 +14,6 @@ Created using `Chris Double's documentation of the c2e shared memory interface <
 
 **Warning: Running custom CAOS can break your Creatures 3 / DS install.**
 
-License TBD, probably a BSD or LGPL.
-
 ---------------------------
 How to inject CAOS from CLI
 ---------------------------
