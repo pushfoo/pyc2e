@@ -40,14 +40,14 @@ The only requirements are:
 
    * - With `pip`
      - Easiest
-     - #. Create & activate a virtual environment
+     - #. `Create & activate a virtual environment <https://docs.python.org/3/library/venv.html>`_
        #. ``pip install pyc2e``
 
    * - From source
      - Freshest code
-     - #. Clone this repository
+     - #. `Clone this repository <https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository#cloning-a-repository>`_
        #. ``cd pyc2e``
-       #. Create & activate a virtual environment
+       #. `Create & activate a virtual environment <https://docs.python.org/3/library/venv.html>`_
        #. ``pip install -e .``
 
 
