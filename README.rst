@@ -28,7 +28,7 @@ Installing
 
 The only requirements are:
 
-* Python 3.7+
+* Python 3.9+
 * A compatible c2e version running in the same permission space as the Python interpreter
 
 .. list-table::

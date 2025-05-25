@@ -1,21 +1,19 @@
 [project]
 name = "pyc2e"
-version = "0.0.5"
+version = "0.0.6"
 readme = "README.rst"
 description = "Engine management & script injection for the Creatures Evolution Engine"
 authors = [
     {name="pushfoo"}
 ]
 license = {file = "LICENSE"}
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 classifiers=[
     "Development Status :: 3 - Alpha",
     "Environment :: Win32 (MS Windows)",
     "Intended Audience :: Developers",
     "Natural Language :: English",
     "Operating System :: Microsoft :: Windows",
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
