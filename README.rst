@@ -102,7 +102,7 @@ Support for the Linux version will likely stay incomplete because the community 
         - Creatures 3 Included
         - Win10 Compatibility Patches
 
-      * - `Eemfoo archive <https://eem.foo/archive/search?query=docking+station&game=&tags%5B%5D=%21program_patch>`_
+      * - `EemFoo archive <https://eem.foo/archive/downloads/d238-dockingstation-195-exe>`_
         - Free
         - No
         - No
